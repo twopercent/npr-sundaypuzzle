@@ -5,6 +5,58 @@ import dbf
 
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 
+STATES_DICT = {
+'AK': 'Alaska',
+'AL': 'Alabama',
+'AR': 'Arkansas',
+'AZ': 'Arizona',
+'CO': 'Colorado',
+'CT': 'Connecticut',
+'DE': 'Delaware',
+'FL': 'Florida',
+'GA': 'Georgia',
+'HI': 'Hawaii',
+'IA': 'Iowa',
+'ID': 'Idaho',
+'IL': 'Illinois',
+'IN': 'Indiana',
+'KS': 'Kansas',
+'KY': 'Kentucky',
+'LA': 'Louisiana',
+'MA': 'Massachusetts',
+'MD': 'Maryland',
+'ME': 'Maine',
+'MI': 'Michigan',
+'MN': 'Minnesota',
+'MO': 'Missouri',
+'MS': 'Mississippi',
+'MT': 'Montana',
+'NC': 'North Carolina',
+'ND': 'North Dakota',
+'NE': 'Nebraska',
+'NH': 'New Hampshire',
+'NJ': 'New Jersey',
+'NM': 'New Mexico',
+'NV': 'Nevada',
+'NY': 'New York',
+'OH': 'Ohio',
+'OK': 'Oklahoma',
+'OR': 'Oregon',
+'PA': 'Pennsylvania',
+'RI': 'Rhode Island',
+'SC': 'South Carolina',
+'SD': 'South Dakota',
+'TN': 'Tennessee',
+'TX': 'Texas',
+'UT': 'Utah',
+'VA': 'Virginia',
+'VI': 'Virgin Islands',
+'VT': 'Vermont',
+'WA': 'Washington',
+'WI': 'Wisconsin',
+'WV': 'West Virginia',
+'WY': 'Wyoming'
+}
 
 #GeoNames
 GEONAMES_ZIP = "POP_PLACES_20160601.zip"
@@ -49,11 +101,13 @@ def get_naturalearth_cities():
     t.open()
 
     for record in t:
-        if record[15] == 'USA' and len(record[4]) == 5:
-            print(record)
-            print('===================================')
-
-    return ()
+        if record[15] == 'USA' and len(record[4].rstrip(' ')) == 5:
+            for abbr, full in STATES_DICT.items():
+                if full == record[18].rstrip(' '):
+                    state_abbr = abbr
+            cities.append([record[4].rstrip(' '), state_abbr, record[27]])
+    t.close()
+    return (cities)
 
 
 def get_pairs(city_array):
@@ -69,21 +123,27 @@ def get_pairs(city_array):
     return (city_pairs)
     
 if __name__ == "__main__":
-    print('ello mate!')
-    get_naturalearth_cities()
+    naturalearth_cities = get_naturalearth_cities()
+    naturalearth_pairs = get_pairs(naturalearth_cities)
 
-    #geonames_cities = get_geonames_cities()
-    #geonames_cities_pairs = get_pairs(geonames_cities)
+    geonames_cities = get_geonames_cities()
+    geonames_pairs = get_pairs(geonames_cities)
 
-    #for city in geonames_cities_pairs:
+
+    print('Geonames ' + str(len(geonames_cities)) + ' city candidates found')
+    print('Geonames ' + str(len(geonames_pairs)) + ' city pairs found')
+
+    print('')
+
+    print('Natural Earth ' + str(len(naturalearth_cities)) + ' city candidates found')
+    print('Natural Earth ' + str(len(naturalearth_pairs)) + ' city pairs found')
+    
+    #Uncomment to see all geonames pairs
+    #for city in geonames_pairs:
     #    print(city[0][0] + ', ' + city[0][1] + ' <-> ' + city[1][0] + ', ' + city[1][1])
     
-    #print(str(len(geonames_cities)) + ' city candidates found')
-    #print(str(len(geonames_cities_pairs)) + ' city pairs found')
+    print('')
 
-#Natural Earth Method
-#import dbf
-#table = dbf.Table('/home/cmoser/Desktop/ne_10m_populated_places_simple.dbf')
-#table.open()
-#for record in table:
-#    print(record)
+    for city in naturalearth_pairs:
+        print(city[0][0] + ', ' + city[0][1] + ' <-> ' + city[1][0] + ', ' + city[1][1])
+
