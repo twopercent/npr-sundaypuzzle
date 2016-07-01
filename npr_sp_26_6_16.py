@@ -105,8 +105,8 @@ def get_naturalearth_cities():
             for abbr, full in STATES_DICT.items():
                 if full == record[18].rstrip(' '):
                     state_abbr = abbr
-            if state_abbr in STATES_DICT:
-                cities.append([record[4].rstrip(' '), state_abbr, record[27]])
+            if record[4][0:2].upper() in STATES_DICT:
+                cities.append([record[4].rstrip(' '), state_abbr])
     t.close()
     return (cities)
 
