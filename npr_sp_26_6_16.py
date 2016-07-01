@@ -3,8 +3,6 @@
 import os
 import dbf
 
-STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-
 STATES_DICT = {
 'AK': 'Alaska',
 'AL': 'Alabama',
@@ -58,19 +56,19 @@ STATES_DICT = {
 'WY': 'Wyoming'
 }
 
-#GeoNames
+#GeoNames files
 GEONAMES_ZIP = "POP_PLACES_20160601.zip"
 GEONAMES_TXT = "POP_PLACES_20160601.txt"
 GEONAMES_URL = "http://geonames.usgs.gov/docs/stategaz/"
 
-#NaturalEarth
+#NaturalEarth files
 NATURALEARTH_ZIP = "ne_10m_populated_places_simple.zip"
 NATURALEARTH_DBF = "ne_10m_populated_places_simple.dbf"
 NATURALEARTH_URL = "http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/"
 
 
 def get_geonames_cities():
-    #Check if we already have the Pop_places file
+    #Check if we already have the Pop_places text file
     if not os.path.isfile(GEONAMES_ZIP):
         os.system('wget ' + GEONAMES_URL + GEONAMES_ZIP + ' -O ' + GEONAMES_ZIP)
     if not os.path.isfile(GEONAMES_TXT):
@@ -82,15 +80,14 @@ def get_geonames_cities():
     for line in f:
         line_split = line.split('|')
         if len(line_split[1]) == 5:
-            for state in STATES:
-                if line_split[1][0:2].upper() == state:
-                    cities.append([line_split[1], line_split[3]])
+            if line_split[1][0:2].upper() in STATES_DICT:
+                cities.append([line_split[1], line_split[3]])
 
     f.close()
     return(cities)
 
 def get_naturalearth_cities():
-#Check if we already have the pop places database
+    #Check if we already have the pop places database
     if not os.path.isfile(NATURALEARTH_ZIP):
         os.system('wget ' + NATURALEARTH_URL + NATURALEARTH_ZIP + ' -O ' + NATURALEARTH_ZIP)
     if not os.path.isfile(NATURALEARTH_DBF):
@@ -102,10 +99,14 @@ def get_naturalearth_cities():
 
     for record in t:
         if record[15] == 'USA' and len(record[4].rstrip(' ')) == 5:
+            #This loop searches the State abbreviation:full name pairs
+            #to match 'Alaska' with 'AK' it is innefecient because we are
+            #finding the key from the value
             for abbr, full in STATES_DICT.items():
                 if full == record[18].rstrip(' '):
                     state_abbr = abbr
-            cities.append([record[4].rstrip(' '), state_abbr, record[27]])
+            if state_abbr in STATES_DICT:
+                cities.append([record[4].rstrip(' '), state_abbr, record[27]])
     t.close()
     return (cities)
 
@@ -116,6 +117,7 @@ def get_pairs(city_array):
     for left_city in city_array:
         for right_city in city_array:
             if left_city[1] == right_city[0][0:2].upper() and right_city[1] == left_city[0][0:2].upper():
+                #This test will only add cityA <-> cityB if cityB <-> cityA is not already in the list
                 if [right_city, left_city] not in city_pairs:
                     #This test removes Wypo, Wy <-> Wypo, WY 
                     if len(set(left_city) & set(right_city)) < 2:
@@ -137,6 +139,8 @@ if __name__ == "__main__":
 
     print('Natural Earth ' + str(len(naturalearth_cities)) + ' city candidates found')
     print('Natural Earth ' + str(len(naturalearth_pairs)) + ' city pairs found')
+   
+   print('')
     
     #Uncomment to see all geonames pairs
     #for city in geonames_pairs:
