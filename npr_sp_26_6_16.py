@@ -140,13 +140,13 @@ if __name__ == "__main__":
     print('Natural Earth ' + str(len(naturalearth_cities)) + ' city candidates found')
     print('Natural Earth ' + str(len(naturalearth_pairs)) + ' city pairs found')
    
-   print('')
+    print('')
     
     #Uncomment to see all geonames pairs
     #for city in geonames_pairs:
     #    print(city[0][0] + ', ' + city[0][1] + ' <-> ' + city[1][0] + ', ' + city[1][1])
     
-    print('')
+    #print('')
 
     for city in naturalearth_pairs:
         print(city[0][0] + ', ' + city[0][1] + ' <-> ' + city[1][0] + ', ' + city[1][1])
